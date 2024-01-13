@@ -2,30 +2,33 @@ from dash import Dash, dcc, Input, html, Output, State
 from dash import callback
 import datetime
 
-app = Dash(__name__)
+external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
+
+app = Dash(__name__, external_stylesheets=external_stylesheets)
 
 app.layout = html.Div(
     children=[
-        dcc.Upload(
-            id='upload-image',
+        # Title
+        html.H1('PDF Manager'),
+        # Section
+        html.Section(
             children=[
-                html.A('Drag and Drop or Select Files')
-            ],
-            multiple=True,
-            style={
-                'width': '90%',
-                'height': '60px',
-                'lineHeight': '60px',
-                'borderWidth': '1px',
-                'borderStyle': 'dashed',
-                'borderRadius': '5px',
-                'textAlign': 'center',
-                'margin': '10px'
-            },
+                html.H2('Split PDF'),
+                dcc.Upload(
+                    html.Button('Upload File'),
+                    id='upload-image',
+                ),
+                html.Div('')
+            ]
         ),
-        html.Div(
-            id='output-image-upload'
+        # Upload
+        html.Div(),
+        # Download
+        html.Button(
+            'Download File',
+            id='download-file',
         ),
+        dcc.Download(),
 
     ]
 )
