@@ -1,13 +1,17 @@
-# ----------------------------
+# ---------------------------------------
 # Libraries
-# ----------------------------
+# ---------------------------------------
 
+import os
 from pypdf import PdfReader, PdfWriter, PdfMerger
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 
 
-# Functions
+# ---------------------------------------
+# PDF Functions
+# ---------------------------------------
+
 def read_pdf(file_path: str) -> PdfReader:
     """
     Read a PDF from a file path and return the object to interact with
@@ -115,7 +119,7 @@ def split_pdf_fixed_ranges(reader: PdfReader, step: int = 1):
 
 def split_pdf_select_pages(reader: PdfReader, pages: str, merge: bool = True):
     """
-
+    Split the pdf on specific pages 
     """
 
     pages_list = pages.split(',')
@@ -124,14 +128,11 @@ def split_pdf_select_pages(reader: PdfReader, pages: str, merge: bool = True):
     pages_number = get_pdf_pages_number(reader)
     filename = get_pdf_metadata(reader).title
 
-    print(pages_set)
-
     if merge is True:
 
         writer = PdfWriter()
         for page_num in range(0, pages_number+1):
             if str(page_num) in pages_set:
-                print(page_num)
                 writer.add_page(reader.pages[page_num-1])
 
         if filename is None:
@@ -145,7 +146,6 @@ def split_pdf_select_pages(reader: PdfReader, pages: str, merge: bool = True):
     else:
         for page_num in range(0, pages_number+1):
             if str(page_num) in pages_set:
-                print(page_num)
                 writer = PdfWriter()
                 writer.add_page(reader.pages[page_num-1])
 
@@ -158,14 +158,47 @@ def split_pdf_select_pages(reader: PdfReader, pages: str, merge: bool = True):
                     writer.write(f)
 
 
+# ---------------------------------------
+# Zip Functions
+# ---------------------------------------
+
 def to_zip_output_folder(zip_filename: str = 'output.zip', directory_to_zip: str = './Train/Output'):
+    """
+    Zip the files in the output folder in the Zip Folder
+    """
     folder = Path(f'{directory_to_zip}')
 
     zip_path = f'./Train/Zip/{zip_filename}'
 
-    for file in folder.iterdir():
-        print(file.name)
-
     with ZipFile(zip_path, 'w', ZIP_DEFLATED) as zip:
         for file in folder.iterdir():
+            print(file.name)
             zip.write(file, arcname=file.name)
+
+
+# ---------------------------------------
+# Delete Files
+# ---------------------------------------
+
+def delete_files_input_folder():
+    """
+    Delete the Files on the Input Folder
+    """
+    folder = Path(f'./Train/Output')
+
+    for file in folder.iterdir():
+        if os.path.exists(file):
+            print(file.name)
+            os.remove(file)
+
+
+def delete_files_zip_folder():
+    """
+    Delete the Files on the Zip Folder
+    """
+    folder = Path(f'./Train/Zip')
+
+    for file in folder.iterdir():
+        if os.path.exists(file):
+            print(file.name)
+            os.remove(file)
