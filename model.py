@@ -158,6 +158,22 @@ def split_pdf_select_pages(reader: PdfReader, pages: str, merge: bool = True):
                     writer.write(f)
 
 
+def merge_pdf(input_path: str = './Train/Input', output_filename: str = 'output.pdf'):
+    """
+    Merge the pdfs in the input folder, in the alfabetical filename order
+    """
+    folder = Path(f'{input_path}')
+    output_path = f'./Train/Output/{output_filename}'
+
+    merger = PdfMerger()
+
+    with open(output_path, 'wb') as f:
+        for file in folder.iterdir():
+            merger.append(file)
+
+        merger.write(f)
+
+
 # ---------------------------------------
 # Zip Functions
 # ---------------------------------------
@@ -180,7 +196,7 @@ def to_zip_output_folder(zip_filename: str = 'output.zip', directory_to_zip: str
 # Delete Files
 # ---------------------------------------
 
-def delete_files_input_folder():
+def delete_files_output_folder():
     """
     Delete the Files on the Input Folder
     """
