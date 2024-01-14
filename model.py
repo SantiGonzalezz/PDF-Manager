@@ -3,6 +3,8 @@
 # ----------------------------
 
 from pypdf import PdfReader, PdfWriter, PdfMerger
+from pathlib import Path
+from zipfile import ZipFile, ZIP_DEFLATED
 
 
 # Functions
@@ -94,7 +96,7 @@ def split_pdf_fixed_ranges(reader: PdfReader, step: int = 1):
         for page_num in range(page_step, page_step+step):
 
             if page_num >= pages_number:
-                continue
+                break
 
             page = reader.pages[page_num]
             writer.add_page(page)
@@ -103,7 +105,7 @@ def split_pdf_fixed_ranges(reader: PdfReader, step: int = 1):
             filename = 'output'
 
         if page_num + 1 > pages_number:
-            new_filename = f'./Train/Output/{filename}_{page_num}.pdf'
+            new_filename = f'./Train/Output/{filename}_{page_step+1}_to_{page_num}.pdf'
         else:
             new_filename = f'./Train/Output/{filename}_{page_step+1}_to_{page_num+1}.pdf'
 
@@ -111,7 +113,7 @@ def split_pdf_fixed_ranges(reader: PdfReader, step: int = 1):
             writer.write(f)
 
 
-def split_pdf_select_pages(reader: PdfReader, pages: str):
+def split_pdf_select_pages(reader: PdfReader, pages: str, merge: bool = True):
     """
 
     """
@@ -122,15 +124,48 @@ def split_pdf_select_pages(reader: PdfReader, pages: str):
     pages_number = get_pdf_pages_number(reader)
     filename = get_pdf_metadata(reader).title
 
-    writer = PdfWriter()
-    for page_num in range(0, pages_number):
-        if str(page_num) in pages_set:
-            writer.add_page(reader.pages[page_num])
+    print(pages_set)
 
-    if filename is None:
-        filename = 'output'
+    if merge is True:
 
-    new_filename = f'./Train/Output/{filename}.pdf'
+        writer = PdfWriter()
+        for page_num in range(0, pages_number+1):
+            if str(page_num) in pages_set:
+                print(page_num)
+                writer.add_page(reader.pages[page_num-1])
 
-    with open(new_filename, 'wb') as f:
-        writer.write(f)
+        if filename is None:
+            filename = 'output'
+
+        new_filename = f'./Train/Output/{filename}_pages.pdf'
+
+        with open(new_filename, 'wb') as f:
+            writer.write(f)
+
+    else:
+        for page_num in range(0, pages_number+1):
+            if str(page_num) in pages_set:
+                print(page_num)
+                writer = PdfWriter()
+                writer.add_page(reader.pages[page_num-1])
+
+                if filename is None:
+                    filename = 'output'
+
+                new_filename = f'./Train/Output/{filename}_{page_num}.pdf'
+
+                with open(new_filename, 'wb') as f:
+                    writer.write(f)
+
+
+def to_zip_output_folder(zip_filename: str = 'output.zip', directory_to_zip: str = './Train/Output'):
+    folder = Path(f'{directory_to_zip}')
+
+    zip_path = f'./Train/Zip/{zip_filename}'
+
+    for file in folder.iterdir():
+        print(file.name)
+
+    with ZipFile(zip_path, 'w', ZIP_DEFLATED) as zip:
+        for file in folder.iterdir():
+            zip.write(file, arcname=file.name)
